@@ -13,19 +13,13 @@ const VoterRegistration = () => {
   });
 
   const [isCameraEnabled, setCameraEnabled] = useState(false);
-  const [qrResult, setQrResult] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleScan = (data) => {
-    if (data) {
-      // Extract UVC number from QR code and fill the input field
-      setFormData({ ...formData, uvc: data });
-      // Store the scanned result separately
-      setQrResult(data);
-    }
+  const onResult = (result) => {
+    setFormData({ ...formData, uvc: result });
   };
 
   const handleError = (err) => {
@@ -38,7 +32,6 @@ const VoterRegistration = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle registration logic here (send data to the server, etc.)
     console.log('Form data submitted:', formData);
   };
 
@@ -112,18 +105,13 @@ const VoterRegistration = () => {
             required
           />
           {/* QR Code Scanner */}
-          {isCameraEnabled ? (
-            <div>
-              <QrReader delay={200} onError={handleError} onScan={handleScan} style={{ width: '100%' }} />
-              {/* Display the scanned result */}
-              {qrResult && <p>Scanned Result: {qrResult}</p>}
-            </div>
-          ) : (
-            <button type="button" onClick={handleEnableCamera}>
-              Enable Camera
-            </button>
+          {isCameraEnabled && (
+            <QrReader delay={200} onError={handleError} onScan={onResult} style={{ width: '100%' }} />
           )}
         </div>
+        <button type="button" onClick={handleEnableCamera}>
+          Enable Camera
+        </button>
         <button type="submit">Register</button>
       </form>
       <p>
