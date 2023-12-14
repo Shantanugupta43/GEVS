@@ -1,7 +1,7 @@
 // components/VoterRegistration.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import { QrReader } from 'react-qr-reader';
 
 const VoterRegistration = () => {
   const [formData, setFormData] = useState({
@@ -13,8 +13,25 @@ const VoterRegistration = () => {
     uvc: '',
   });
 
+  const [isCameraEnabled, setCameraEnabled] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleScan = (data) => {
+    if (data) {
+      // Extract UVC number from QR code and fill the input field
+      setFormData({ ...formData, uvc: data });
+    }
+  };
+
+  const handleError = (err) => {
+    console.error(err);
+  };
+
+  const handleEnableCamera = () => {
+    setCameraEnabled(true);
   };
 
   const handleSubmit = (e) => {
@@ -91,10 +108,20 @@ const VoterRegistration = () => {
             onChange={handleChange}
             required
           />
+          {/* QR Code Scanner */}
+          {isCameraEnabled ? (
+            <QrReader delay={200} onError={handleError} onScan={handleScan} style={{ width: '20%' }} />
+          ) : (
+            <button type="button" onClick={handleEnableCamera}>
+              Enable Camera
+            </button>
+          )}
         </div>
         <button type="submit">Register</button>
       </form>
-      <p>Already registered? <Link to="/login">Login here</Link></p>
+      <p>
+        Already registered? <Link to="/login">Login here</Link>
+      </p>
     </div>
   );
 };
