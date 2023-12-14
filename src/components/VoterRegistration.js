@@ -18,16 +18,17 @@ const VoterRegistration = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const onResult = (result) => {
-    setFormData({ ...formData, uvc: result?.text || '' });
-  };
-
-  const handleError = (err) => {
-    console.error(err);
-  };
 
   const handleEnableCamera = () => {
     setCameraEnabled(true);
+  };
+
+  const onResult = (result, error) => {
+    if (!!error) {
+      console.info(error);
+    } else {
+      setFormData({ ...formData, uvc: result?.text || '' });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -106,7 +107,11 @@ const VoterRegistration = () => {
           />
           {/* QR Code Scanner */}
           {isCameraEnabled && (
-            <QrReader delay={200} onError={handleError} onScan={onResult} style={{ width: '100%' }} />
+            <QrReader
+              delay={200}
+              onResult={onResult}
+              style={{ width: '100%' }}
+            />
           )}
         </div>
         <button type="button" onClick={handleEnableCamera}>
