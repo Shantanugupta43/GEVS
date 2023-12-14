@@ -19,7 +19,7 @@ const VoterRegistration = () => {
   };
 
   const onResult = (result) => {
-    setFormData({ ...formData, uvc: result });
+    setFormData({ ...formData, uvc: result?.text });
   };
 
   const handleError = (err) => {
