@@ -110,7 +110,7 @@ const VoterRegistration = () => {
           />
           {/* QR Code Scanner */}
           {isCameraEnabled ? (
-            <QrReader delay={200} onError={handleError} onScan={handleScan} style={{ width: '100%' }} />
+            <QrReader delay={500} onError={handleError} onScan={handleScan} style={{ width: '100%' }} />
           ) : (
             <button type="button" onClick={handleEnableCamera}>
               Enable Camera
