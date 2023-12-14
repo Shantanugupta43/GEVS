@@ -1,4 +1,3 @@
-// components/VoterRegistration.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QrReader } from 'react-qr-reader';
@@ -37,6 +36,7 @@ const VoterRegistration = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle registration logic here (send data to the server, etc.)
+    console.log('Form data submitted:', formData);
   };
 
   return (
@@ -110,7 +110,7 @@ const VoterRegistration = () => {
           />
           {/* QR Code Scanner */}
           {isCameraEnabled ? (
-            <QrReader delay={200} onError={handleError} onScan={handleScan} style={{ width: '20%' }} />
+            <QrReader delay={200} onError={handleError} onScan={handleScan} style={{ width: '100%' }} />
           ) : (
             <button type="button" onClick={handleEnableCamera}>
               Enable Camera
