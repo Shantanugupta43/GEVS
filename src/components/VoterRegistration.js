@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { QrReader } from 'react-qr-reader';
 
@@ -18,6 +18,10 @@ const VoterRegistration = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    // Handle asynchronous updates to the uvc state, if needed
+    console.log('Updated UVC:', formData.uvc);
+  }, [formData.uvc]);
 
   const handleEnableCamera = () => {
     setCameraEnabled(true);
@@ -27,6 +31,7 @@ const VoterRegistration = () => {
     if (!!error) {
       console.info(error);
     } else {
+      console.log('Scanned QR Code:', result?.text);
       setFormData({ ...formData, uvc: result?.text || '' });
     }
   };
@@ -34,8 +39,10 @@ const VoterRegistration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Submitting Form Data:', formData);
+
       // Send registration data to the server
-      const response = await fetch('https://secret-springs-45683-d2f362cc85ce.herokuapp.com/api/register', {
+      const response = await fetch('http://localhost:3001/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,11 +53,10 @@ const VoterRegistration = () => {
       if (response.ok) {
         // Registration successful
         console.log('Registration successful');
-       
       } else {
         // Registration failed
         console.error('Registration failed:', response.statusText);
-        //  show an error message to the user
+        // show an error message to the user
       }
     } catch (error) {
       console.error('Error during registration:', error.message);
@@ -117,29 +123,23 @@ const VoterRegistration = () => {
             required
           />
         </div>
+
         <div>
           <label htmlFor="uvc">Unique Voter Code (UVC):</label>
-          <input
-            type="text"
-            id="uvc"
-            name="uvc"
-            value={formData.uvc}
-            required
-          />
+          <input type="text" id="uvc" name="uvc" value={formData.uvc} required />
+
           {/* QR Code Scanner */}
           {isCameraEnabled && (
-            <QrReader
-              delay={200}
-              onResult={onResult}
-              style={{ width: '100%' }}
-            />
+            <QrReader delay={200} onResult={onResult} style={{ width: '100%' }} />
           )}
         </div>
+
         <button type="button" onClick={handleEnableCamera}>
           Enable Camera
         </button>
         <button type="submit">Register</button>
       </form>
+
       <p>
         Already registered? <Link to="/login">Login here</Link>
       </p>

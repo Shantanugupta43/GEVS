@@ -30,7 +30,8 @@ CREATE TABLE `candidate` (
   `vote_count` int DEFAULT NULL,
   PRIMARY KEY (`canid`),
   KEY `pid_idx` (`party_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,7 +55,8 @@ CREATE TABLE `constituency` (
   `consitituency_id` int NOT NULL AUTO_INCREMENT,
   `constituency_name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`consitituency_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,7 +80,8 @@ CREATE TABLE `party` (
   `party_id` int NOT NULL AUTO_INCREMENT,
   `party` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`party_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,7 +105,8 @@ CREATE TABLE `uvc_code` (
   `UVC` varchar(50) NOT NULL,
   `used` int DEFAULT NULL,
   PRIMARY KEY (`UVC`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,7 +134,8 @@ CREATE TABLE `voters` (
   `UVC` varchar(45) DEFAULT NULL,
   `constituency_id` int DEFAULT NULL,
   PRIMARY KEY (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,7 +161,8 @@ CREATE TABLE `user_email` (
   PRIMARY KEY (`voter_id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   CONSTRAINT `fk_user_email_voters` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,7 +177,8 @@ CREATE TABLE `user_password` (
   `password` longtext NOT NULL,
   PRIMARY KEY (`voter_id`),
   CONSTRAINT `fk_user_password_voters` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,7 +193,8 @@ CREATE TABLE `user_dob` (
   `dob` date DEFAULT NULL,
   PRIMARY KEY (`voter_id`),
   CONSTRAINT `fk_user_dob_voters` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
