@@ -31,10 +31,31 @@ const VoterRegistration = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form data submitted:', formData);
-    // Handle registration logic here (send data to the server, etc.)
+    try {
+      // Send registration data to the server
+      const response = await fetch('https://secret-springs-45683-d2f362cc85ce.herokuapp.com/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        // Registration successful
+        console.log('Registration successful');
+       
+      } else {
+        // Registration failed
+        console.error('Registration failed:', response.statusText);
+        //  show an error message to the user
+      }
+    } catch (error) {
+      console.error('Error during registration:', error.message);
+      // Handle other errors (network issues, etc.)
+    }
   };
 
   return (
