@@ -8,7 +8,7 @@ const VoterRegistration = () => {
     fullName: '',
     dateOfBirth: '',
     password: '',
-    constituency: '',
+    constituency: '', 
     uvc: '',
   });
 
@@ -16,6 +16,30 @@ const VoterRegistration = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleTownChange = (e) => {
+    // Update the constituency_id based on the selected town
+    const town = e.target.value;
+    const constituencyId = getConstituencyIdByTown(town);
+    setFormData({ ...formData, constituency: town, constituencyId });
+  };
+
+  const getConstituencyIdByTown = (town) => {
+    switch (town) {
+      case 'Shangri-la-Town':
+        return 1;
+      case 'Northern-Kunlun-Mountain':
+        return 2;
+      case 'Western-Shangri-la':
+        return 3;
+      case 'Naboo-Vallery':
+        return 4;
+      case 'New-Felucia':
+        return 5;
+      default:
+        return null;
+    }
   };
 
   useEffect(() => {
@@ -35,6 +59,7 @@ const VoterRegistration = () => {
       setFormData({ ...formData, uvc: result?.text || '' });
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,14 +139,20 @@ const VoterRegistration = () => {
         </div>
         <div>
           <label htmlFor="constituency">Constituency:</label>
-          <input
-            type="text"
+          <select
             id="constituency"
             name="constituency"
             value={formData.constituency}
-            onChange={handleChange}
+            onChange={handleTownChange}
             required
-          />
+          >
+            <option value="">Select Town</option>
+            <option value="Shangri-la-Town">Shangri-la-Town</option>
+            <option value="Northern-Kunlun-Mountain">Northern-Kunlun-Mountain</option>
+            <option value="Western-Shangri-la">Western-Shangri-la</option>
+            <option value="Naboo-Vallery">Naboo-Vallery</option>
+            <option value="New-Felucia">New-Felucia</option>
+          </select>
         </div>
 
         <div>

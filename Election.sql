@@ -26,7 +26,7 @@ CREATE TABLE `candidate` (
   `canid` int NOT NULL AUTO_INCREMENT,
   `candidate` varchar(100) DEFAULT NULL,
   `party_id` int NOT NULL,
-  `consitituency_id` int NOT NULL,
+  `constituency_id` int NOT NULL,
   `vote_count` int DEFAULT NULL,
   PRIMARY KEY (`canid`),
   KEY `pid_idx` (`party_id`)
@@ -52,9 +52,9 @@ DROP TABLE IF EXISTS `constituency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `constituency` (
-  `consitituency_id` int NOT NULL AUTO_INCREMENT,
+  `constituency_id` int NOT NULL AUTO_INCREMENT,
   `constituency_name` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`consitituency_id`)
+  PRIMARY KEY (`constituency_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -134,65 +134,6 @@ CREATE TABLE `voters` (
   `UVC` varchar(45) DEFAULT NULL,
   `constituency_id` int DEFAULT NULL,
   PRIMARY KEY (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `voters`
---
-
-LOCK TABLES `voters` WRITE;
-/*!40000 ALTER TABLE `voters` DISABLE KEYS */;
-INSERT INTO `voters` VALUES ('1','John Smith','1990-01-01','5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5','HH64FWPE',1);
-/*!40000 ALTER TABLE `voters` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `user_email`
---
-
-DROP TABLE IF EXISTS `user_email`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_email` (
-  `voter_id` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  PRIMARY KEY (`voter_id`),
-  UNIQUE KEY `email_UNIQUE` (`email`),
-  CONSTRAINT `fk_user_email_voters` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `user_password`
---
-
-DROP TABLE IF EXISTS `user_password`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_password` (
-  `voter_id` varchar(50) NOT NULL,
-  `password` longtext NOT NULL,
-  PRIMARY KEY (`voter_id`),
-  CONSTRAINT `fk_user_password_voters` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `user_dob`
---
-
-DROP TABLE IF EXISTS `user_dob`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_dob` (
-  `voter_id` varchar(50) NOT NULL,
-  `dob` date DEFAULT NULL,
-  PRIMARY KEY (`voter_id`),
-  CONSTRAINT `fk_user_dob_voters` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*!40101 SET character_set_client = @saved_cs_client */;

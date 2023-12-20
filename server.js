@@ -43,13 +43,13 @@ app.post('/api/register', async (req, res) => {
 
       // Check if the provided constituency name exists in the database
       const [constituencyRows, constituencyFields] = await pool.execute(
-        'SELECT consitituency_id FROM constituency WHERE constituency_name = ?',
+        'SELECT constituency_id FROM constituency WHERE constituency_name = ?',
         [constituency]
       );
 
       if (constituencyRows.length === 1) {
         // Constituency is valid, proceed with voter registration
-        const constituencyId = constituencyRows[0].consitituency_id;
+        const constituencyId = constituencyRows[0].constituency_id;
 
         // Hash the password before storing it
         const hashedPassword = await bcrypt.hash(password, saltRounds);
