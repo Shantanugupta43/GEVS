@@ -1,16 +1,23 @@
+// VoterRegistration.js
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { QrReader } from 'react-qr-reader';
 
 const VoterRegistration = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: '',
     fullName: '',
     dateOfBirth: '',
     password: '',
-    constituency: '', 
+    confirmPassword: '',
+    constituency: '',
     uvc: '',
   });
+
+  const [passwordError, setPasswordError] = useState('');
+  const [uvcError, setUvcError] = useState('');
 
   const [isCameraEnabled, setCameraEnabled] = useState(false);
 
@@ -19,7 +26,6 @@ const VoterRegistration = () => {
   };
 
   const handleTownChange = (e) => {
-    // Update the constituency_id based on the selected town
     const town = e.target.value;
     const constituencyId = getConstituencyIdByTown(town);
     setFormData({ ...formData, constituency: town, constituencyId });
@@ -43,7 +49,6 @@ const VoterRegistration = () => {
   };
 
   useEffect(() => {
-    // Handle asynchronous updates to the uvc state, if needed
     console.log('Updated UVC:', formData.uvc);
   }, [formData.uvc]);
 
@@ -59,14 +64,20 @@ const VoterRegistration = () => {
       setFormData({ ...formData, uvc: result?.text || '' });
     }
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if password and confirm password match
+    if (formData.password !== formData.confirmPassword) {
+      setPasswordError('Password and Confirm Password do not match.');
+    } else {
+      setPasswordError('');
+    }
+
     try {
       console.log('Submitting Form Data:', formData);
 
-      // Send registration data to the server
       const response = await fetch('http://localhost:3001/api/register', {
         method: 'POST',
         headers: {
@@ -76,16 +87,23 @@ const VoterRegistration = () => {
       });
 
       if (response.ok) {
-        // Registration successful
         console.log('Registration successful');
+        navigate('/voter-dashboard');
       } else {
-        // Registration failed
         console.error('Registration failed:', response.statusText);
-        // show an error message to the user
+        if (response.status === 400) {
+          const responseData = await response.json();
+          if (responseData.message === 'Invalid UVC code or already used') {
+            setUvcError('Invalid UVC code or already used. Please check your information.');
+          } else {
+            setUvcError('UVC validation failed. Please check your information.');
+          }
+        } else {
+          alert('Registration failed. Please check your information.');
+        }
       }
     } catch (error) {
       console.error('Error during registration:', error.message);
-      // Handle other errors (network issues, etc.)
     }
   };
 
@@ -138,6 +156,18 @@ const VoterRegistration = () => {
           />
         </div>
         <div>
+          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+          {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
+        </div>
+        <div>
           <label htmlFor="constituency">Constituency:</label>
           <select
             id="constituency"
@@ -157,11 +187,17 @@ const VoterRegistration = () => {
 
         <div>
           <label htmlFor="uvc">Unique Voter Code (UVC):</label>
-          <input type="text" id="uvc" name="uvc" value={formData.uvc} required />
-
-          {/* QR Code Scanner */}
+          <input
+            type="text"
+            id="uvc"
+            name="uvc"
+            value={formData.uvc}
+            onChange={handleChange}
+            required
+          />
+          {uvcError && <p style={{ color: 'red' }}>{uvcError}</p>}
           {isCameraEnabled && (
-            <QrReader delay={200} onResult={onResult} style={{ width: '100%' }} />
+            <QrReader delay={200} onResult={onResult} style={{ width: '30%' }} />
           )}
         </div>
 
