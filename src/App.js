@@ -5,6 +5,7 @@ import VoterRegistration from './components/VoterRegistration';
 import VoterLogin from './components/VoterLogin';
 import VoterDashboard from './components/VoterDashboard';
 import ElectionOfficerDashboard from './components/ElectionOfficerDashboard';
+import OfficerLogin from './components/OfficerLogin';
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/login" element={<VoterLogin />} />
         <Route path="/voter-dashboard" element={<VoterDashboard/>} />
         <Route path="/election-officer-dashboard" element={<ElectionOfficerDashboard />} />
+        <Route path="/officer-login" element={<OfficerLogin />} />
       </Routes>
     </Router>
   );

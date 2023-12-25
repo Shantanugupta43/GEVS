@@ -18,6 +18,7 @@ const VoterRegistration = () => {
 
   const [passwordError, setPasswordError] = useState('');
   const [uvcError, setUvcError] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const [isCameraEnabled, setCameraEnabled] = useState(false);
 
@@ -67,17 +68,17 @@ const VoterRegistration = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Check if password and confirm password match
     if (formData.password !== formData.confirmPassword) {
       setPasswordError('Password and Confirm Password do not match.');
     } else {
       setPasswordError('');
     }
-
+  
     try {
       console.log('Submitting Form Data:', formData);
-
+  
       const response = await fetch('http://localhost:3001/api/register', {
         method: 'POST',
         headers: {
@@ -85,7 +86,7 @@ const VoterRegistration = () => {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (response.ok) {
         console.log('Registration successful');
         navigate('/voter-dashboard');
@@ -95,8 +96,15 @@ const VoterRegistration = () => {
           const responseData = await response.json();
           if (responseData.message === 'Invalid UVC code or already used') {
             setUvcError('Invalid UVC code or already used. Please check your information.');
+          } else if (responseData.message === 'Email is already linked to another registered voter') {
+            setEmailError('Email is already linked to another registered voter');
           } else {
             setUvcError('UVC validation failed. Please check your information.');
+          }
+  
+          // Check if it's a UVC error and handle accordingly
+          if (responseData.uvcError) {
+            setUvcError('Invalid UVC code or already used. Please check your information.');
           }
         } else {
           alert('Registration failed. Please check your information.');
@@ -110,6 +118,7 @@ const VoterRegistration = () => {
   return (
     <div>
       <h2>Voter Registration</h2>
+      
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email">Email:</label>
@@ -121,6 +130,7 @@ const VoterRegistration = () => {
             onChange={handleChange}
             required
           />
+          {emailError && <p style={{ color: 'red' }}>{emailError}</p>}
         </div>
         <div>
           <label htmlFor="fullName">Full Name:</label>

@@ -25,10 +25,23 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Endpoint for user registration
+// Endpoint for user registration
 app.post('/api/register', async (req, res) => {
   console.log('Request Body:', JSON.stringify(req.body)); // Log the request body
   try {
-    const { email, fullName, dateOfBirth, password, constituency, uvc } = req.body;
+    const { email, fullName, dateOfBirth, password, confirmPassword, constituency, uvc } = req.body;
+
+    // Check if the email exists in the voters table
+    const [emailCheckRows, emailCheckFields] = await pool.execute(
+      'SELECT * FROM voters WHERE voter_id = ?',
+      [email]
+    );
+
+    if (emailCheckRows.length > 0) {
+      // Email is already used
+      res.status(400).json({ message: 'Email is already linked to another registered voter' });
+      return;
+    }
 
     const [uvcRows, uvcFields] = await pool.execute(
       'SELECT * FROM uvc_code WHERE UVC = ? AND used = 0',
@@ -66,14 +79,15 @@ app.post('/api/register', async (req, res) => {
         res.status(400).json({ message: 'Invalid constituency' });
       }
     } else {
-      // Invalid UVC code
-      res.status(400).json({ message: 'Invalid UVC code or already used' });
+      // Invalid UVC code or already used
+      res.status(400).json({ message: 'Invalid UVC code or already used', uvcError: true });
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 
 // Endpoint for user login
@@ -115,6 +129,43 @@ app.get('/api/election-officer-dashboard', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+app.post('/api/adminlogin', async (req, res) => {
+  try {
+    const { admin_email, password } = req.body;
+
+    console.log('Parameter values:', admin_email, password);
+
+    // Check if the email exists in the admin table
+    const [adminRows, adminFields] = await pool.execute(
+      'SELECT * FROM admin WHERE admin_email = ?',
+      [admin_email]
+    );
+
+    if (adminRows.length === 1) {
+      // Admin email exists, compare hashed passwords
+      const hashedPassword = adminRows[0].password;
+
+      const passwordMatch = await bcrypt.compare(password, hashedPassword);
+
+      if (passwordMatch) {
+        // Passwords match, admin login successful
+        res.status(200).json({ message: 'Admin login successful' });
+      } else {
+        // Incorrect password
+        res.status(401).json({ message: 'Incorrect email or password' });
+      }
+    } else {
+      // Admin email does not exist
+      res.status(401).json({ message: 'Incorrect email or password' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
