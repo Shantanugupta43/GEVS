@@ -20,6 +20,8 @@ const VoterRegistration = () => {
   const [uvcError, setUvcError] = useState('');
   const [emailError, setEmailError] = useState('');
 
+  const [selectedConstituency, setSelectedConstituency] = useState('');
+
   const [isCameraEnabled, setCameraEnabled] = useState(false);
 
   const handleChange = (e) => {
@@ -89,7 +91,7 @@ const VoterRegistration = () => {
   
       if (response.ok) {
         console.log('Registration successful');
-        navigate('/voter-dashboard');
+        navigate('/voter-dashboard', { state: { selectedConstituency } });
       } else {
         console.error('Registration failed:', response.statusText);
         if (response.status === 400) {
@@ -183,7 +185,11 @@ const VoterRegistration = () => {
             id="constituency"
             name="constituency"
             value={formData.constituency}
-            onChange={handleTownChange}
+            onChange={(e) => {
+              handleTownChange(e);
+              // Update: Store the selected constituency in the state
+              setSelectedConstituency(e.target.value);
+            }}
             required
           >
             <option value="">Select Town</option>

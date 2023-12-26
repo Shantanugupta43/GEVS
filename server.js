@@ -90,12 +90,11 @@ app.post('/api/register', async (req, res) => {
 
 
 
-// Endpoint for user login
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const [rows, fields] = await pool.execute(
-      'SELECT * FROM voters WHERE voter_id = ?',
+      'SELECT voters.*, constituency.constituency_name FROM voters JOIN constituency ON voters.constituency_id = constituency.constituency_id WHERE voter_id = ?',
       [email]
     );
 
@@ -105,7 +104,7 @@ app.post('/api/login', async (req, res) => {
 
       if (match) {
         // Successful login
-        res.status(200).json({ message: 'Login successful' });
+        res.status(200).json({ message: 'Login successful', user: rows[0] });
       } else {
         res.status(401).json({ message: 'Invalid credentials' });
       }
@@ -164,6 +163,56 @@ app.post('/api/adminlogin', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+app.get('/api/candidates', async (req, res) => {
+  try {
+    const [candidateRows, candidateFields] = await pool.query(
+      'SELECT candidate.canid, candidate.candidate, party.party FROM candidate JOIN party ON candidate.party_id = party.party_id'
+    );
+    res.status(200).json({ candidates: candidateRows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.get('/api/candidates/:constituency', async (req, res) => {
+  try {
+    const { constituency } = req.params;
+    const [rows, fields] = await pool.execute(
+      'SELECT candidate.canid, candidate.candidate, party.party FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = (SELECT constituency_id FROM constituency WHERE constituency_name = ?)',
+      [constituency]
+    );
+
+    res.status(200).json({ candidates: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/api/constituency/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows, fields] = await pool.execute(
+      'SELECT constituency_name FROM constituency WHERE constituency_id = ?',
+      [id]
+    );
+
+    if (rows.length === 1) {
+      res.status(200).json({ constituency_name: rows[0].constituency_name });
+    } else {
+      res.status(404).json({ message: 'Constituency not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
 
 
 

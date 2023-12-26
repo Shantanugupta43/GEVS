@@ -16,7 +16,7 @@ const VoterLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       // Send login data to the server for validation
       const response = await fetch('http://localhost:3001/api/login', {
@@ -26,12 +26,20 @@ const VoterLogin = () => {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (response.ok) {
         // Login successful
+        const responseData = await response.json();
+        const selectedConstituencyId = responseData.user.constituency_id;
+  
+        // Retrieve the constituency name based on the saved constituency_id
+        const constituencyResponse = await fetch(`http://localhost:3001/api/constituency/${selectedConstituencyId}`);
+        const constituencyData = await constituencyResponse.json();
+        const selectedConstituencyName = constituencyData.constituency_name;
+  
         console.log('Login successful');
-        // Redirect to VoterDashboard upon successful login
-        navigate('/voter-dashboard');
+        // Redirect to VoterDashboard with the selected constituency name
+        navigate('/voter-dashboard', { state: { selectedConstituency: selectedConstituencyName } });
       } else {
         // Login failed
         console.error('Login failed:', response.statusText);
@@ -48,6 +56,7 @@ const VoterLogin = () => {
       // Handle other errors (network issues, etc.)
     }
   };
+  
 
   return (
     <div>
