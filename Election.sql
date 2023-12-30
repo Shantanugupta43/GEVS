@@ -19,6 +19,8 @@
 -- Table structure for table `candidate`
 --
 
+
+
 DROP TABLE IF EXISTS `candidate`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -28,19 +30,40 @@ CREATE TABLE `candidate` (
   `party_id` int NOT NULL,
   `constituency_id` int NOT NULL,
   `vote_count` int DEFAULT NULL,
+  `elected` BOOLEAN NOT NULL DEFAULT 0,
   PRIMARY KEY (`canid`),
   KEY `pid_idx` (`party_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `candidate`
---
-
 LOCK TABLES `candidate` WRITE;
 /*!40000 ALTER TABLE `candidate` DISABLE KEYS */;
-INSERT INTO `candidate` VALUES (1,'Candidate 1',2,1,0);
+
+INSERT INTO `candidate` VALUES (1,'Candidate 1', 1, 1, 0, 0),
+(2,'Candidate 2', 2, 1, 0, 0),
+(3,'Candidate 3', 3, 1, 0, 0),
+(4,'Candidate 4', 4, 1, 0, 0),
+-- Constituency 2
+(5,'Candidate 5', 1, 2, 0, 0),
+(6,'Candidate 6', 2, 2, 0, 0),
+(7,'Candidate 7', 3, 2, 0, 0),
+(8,'Candidate 8', 4, 2, 0, 0),
+-- Constituency 3
+(9,'Candidate 9', 1, 3, 0, 0),
+(10,'Candidate 10', 2, 3, 0, 0),
+(11,'Candidate 11', 3, 3, 0, 0),
+(12,'Candidate 12', 4, 3, 0, 0),
+-- Constituency 4
+(13,'Candidate 13', 1, 4, 0, 0),
+(14,'Candidate 14', 2, 4, 0, 0),
+(15,'Candidate 15', 3, 4, 0, 0),
+(16,'Candidate 16', 4, 4, 0, 0),
+-- Constituency 5
+(17,'Candidate 17', 1, 5, 0, 0),
+(18,'Candidate 18', 2, 5, 0, 0),
+(19,'Candidate 19', 3, 5, 0, 0),
+(20,'Candidate 20', 4, 5, 0, 0);
+
 /*!40000 ALTER TABLE `candidate` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -139,6 +162,8 @@ CREATE TABLE `voters` (
 --
 -- Table structure for table `admin`
 --
+
+DROP TABLE IF EXISTS `admin`;
 
 CREATE TABLE `admin` (
   `admin_id` int NOT NULL AUTO_INCREMENT,

@@ -26,8 +26,8 @@ app.get('/api/health', async (req, res) => {
 
 // Endpoint for user registration
 // Endpoint for user registration
+// Endpoint for user registration
 app.post('/api/register', async (req, res) => {
-  console.log('Request Body:', JSON.stringify(req.body)); // Log the request body
   try {
     const { email, fullName, dateOfBirth, password, confirmPassword, constituency, uvc } = req.body;
 
@@ -39,8 +39,7 @@ app.post('/api/register', async (req, res) => {
 
     if (emailCheckRows.length > 0) {
       // Email is already used
-      res.status(400).json({ message: 'Email is already linked to another registered voter' });
-      return;
+      return res.status(400).json({ message: 'Email is already linked to another registered voter' });
     }
 
     const [uvcRows, uvcFields] = await pool.execute(
@@ -51,8 +50,6 @@ app.post('/api/register', async (req, res) => {
     if (uvcRows.length === 1) {
       // UVC code is valid, mark it as used
       await pool.execute('UPDATE uvc_code SET used = 1 WHERE UVC = ?', [uvc]);
-
-      console.log('UVC code is valid');
 
       // Check if the provided constituency name exists in the database
       const [constituencyRows, constituencyFields] = await pool.execute(
@@ -68,23 +65,23 @@ app.post('/api/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // Proceed with voter registration
-        const [rows, fields] = await pool.execute(
+        await pool.execute(
           'INSERT INTO voters (voter_id, full_name, DOB, password, constituency_id, UVC) VALUES (?, ?, ?, ?, ?, ?)',
           [email, fullName, dateOfBirth, hashedPassword, constituencyId, uvc]
         );
 
-        res.status(201).json({ message: 'Registration successful' });
+        return res.status(201).json({ message: 'Registration successful' });
       } else {
         // Invalid constituency
-        res.status(400).json({ message: 'Invalid constituency' });
+        return res.status(400).json({ message: 'Invalid constituency' });
       }
     } else {
       // Invalid UVC code or already used
-      res.status(400).json({ message: 'Invalid UVC code or already used', uvcError: true });
+      return res.status(400).json({ message: 'Invalid UVC code or already used', uvcError: true });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
@@ -177,11 +174,12 @@ app.get('/api/candidates', async (req, res) => {
   }
 });
 
+
 app.get('/api/candidates/:constituency', async (req, res) => {
   try {
     const { constituency } = req.params;
     const [rows, fields] = await pool.execute(
-      'SELECT candidate.canid, candidate.candidate, party.party FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = (SELECT constituency_id FROM constituency WHERE constituency_name = ?)',
+      'SELECT candidate.canid, candidate.candidate, party.party FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = (SELECT constituency_id FROM constituency WHERE constituency_name = ?) AND candidate.elected = 0',
       [constituency]
     );
 
@@ -191,6 +189,31 @@ app.get('/api/candidates/:constituency', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+// Add a new API endpoint to handle vote submission
+app.post('/api/submit-vote/:candidateId', async (req, res) => {
+  try {
+    const { candidateId } = req.params;
+
+    // Example SQL queries to update candidate and mark the voter as having voted
+    await pool.execute('UPDATE `candidate` SET `vote_count` = `vote_count` + 1, `elected` = 1 WHERE `canid` = ?', [candidateId]);
+    // Update the voter's table to mark them as having voted
+    if (req.user && req.user.voter_id) {
+      await pool.execute('UPDATE `voters` SET `voted` = 1 WHERE `voter_id` = ?', [req.user.voter_id]);
+    } else {
+      console.error('User is not authenticated or missing voter_id');
+      res.status(401).json({ message: 'User not authenticated or missing voter_id' });
+    }
+    
+
+    res.status(200).json({ message: 'Vote submitted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
 
 
 app.get('/api/constituency/:id', async (req, res) => {
