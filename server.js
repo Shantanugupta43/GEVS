@@ -105,7 +105,7 @@ app.post('/api/login', async (req, res) => {
         // Successful login
         // Generate JWT token and send it in the response
         const secretKey = process.env.SECRET_KEY; // Use the environment variable for the secret key
-        const token = jwt.sign({ user: rows[0] }, secretKey, { expiresIn: '30s' });
+        const token = jwt.sign({ user: rows[0] }, secretKey, { expiresIn: '5m' });
         console.log('Server gen token',token)
 
         res.status(200).json({ message: 'Login successful', user: rows[0], token });

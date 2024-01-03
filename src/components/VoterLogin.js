@@ -34,8 +34,14 @@ const VoterLogin = () => {
         // Save the token to localStorage
         localStorage.setItem('jwtToken', token);
 
-        // Redirect to the dashboard and pass the user information
-        navigate('/voter-dashboard', { state: { selectedConstituency: user.constituency_name, user } });
+        // Check if the user has already voted
+        if (user.vote === 1) {
+          // User has already voted, redirect to a page indicating that
+          navigate('/alreadyVoted');
+        } else {
+          // User has not voted, redirect to the dashboard
+          navigate('/voter-dashboard', { state: { selectedConstituency: user.constituency_name, user } });
+        }
       } else {
         console.error('Login failed:', response.statusText);
         if (response.status === 401) {

@@ -6,6 +6,7 @@ import VoterLogin from './components/VoterLogin';
 import VoterDashboard from './components/VoterDashboard';
 import ElectionOfficerDashboard from './components/ElectionOfficerDashboard';
 import OfficerLogin from './components/OfficerLogin';
+import AlreadyVoted from './components/alreadyVoted';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/voter-dashboard" element={<VoterDashboard/>} />
         <Route path="/election-officer-dashboard" element={<ElectionOfficerDashboard />} />
         <Route path="/officer-login" element={<OfficerLogin />} />
+        <Route path= "/alreadyVoted" element={<AlreadyVoted />} />
       </Routes>
     </Router>
   );
