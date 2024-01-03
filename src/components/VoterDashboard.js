@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const VoterDashboard = () => {
   const location = useLocation();
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [voteSubmitted, setVoteSubmitted] = useState(false);
 
-  // Retrieve the selected constituency from the location state
   const selectedConstituency = location.state?.selectedConstituency;
 
-  useEffect(() => {
+  // Define fetchCandidates using useCallback
+  const fetchCandidates = useCallback(() => {
     if (selectedConstituency) {
-      // Fetch candidates based on the selected constituency
       fetch(`http://localhost:3001/api/candidates/${selectedConstituency}`)
         .then((response) => response.json())
         .then((data) => {
@@ -23,27 +23,57 @@ const VoterDashboard = () => {
     }
   }, [selectedConstituency]);
 
+  useEffect(() => {
+    // Fetch candidates when the component mounts
+    fetchCandidates();
+  }, [fetchCandidates]);
 
   const submitVote = () => {
-    // Implement logic to submit the vote
-    // Update the candidate's vote_count and mark the voter as having voted
-    // Use an API endpoint to update the database
+    if (voteSubmitted) {
+      console.log('You have already voted.');
+      return;
+    }
+  
+    const token = localStorage.getItem('jwtToken');
+    console.log('Stored Token:', token);
+  
+    if (!token) {
+      // Token not found, user is not authenticated
+      console.log('User not authenticated. Please log in.');
+      // You can redirect to the login page or show an appropriate message
+      return;
+    }
+  
     if (selectedCandidate) {
-      // Call an API to submit the vote and handle the logic on the server
       fetch(`http://localhost:3001/api/submit-vote/${selectedCandidate.canid}`, {
         method: 'POST',
-        // Add headers and other configurations as needed
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          console.log('Response Status:', response.status);
+          if (response.status === 401) {
+            // Token expired, show alert and prevent the vote
+            window.alert('Session has expired. Please log in again.');
+            localStorage.removeItem('jwtToken'); // Remove the expired token
+            window.location.href = '/login'; // Redirect to the login page
+            return Promise.reject('Unauthorized');
+          }
+          return response.json();
+        })
         .then((data) => {
-          // Handle the response, update the UI, etc.
-          console.log('Vote submitted successfully');
+          console.log('Vote submitted successfully', data);
+          setVoteSubmitted(true);
         })
         .catch((error) => {
-          console.error('Error submitting vote:', error);
+          console.error('Error submitting vote:', error.message);
         });
     }
   };
+  
+  
 
   return (
     <div>
@@ -56,7 +86,9 @@ const VoterDashboard = () => {
               {candidates.map((candidate) => (
                 <li key={candidate.canid}>
                   {candidate.candidate} - {candidate.party}
-                  <button onClick={() => setSelectedCandidate(candidate)}>Vote</button>
+                  <button onClick={() => setSelectedCandidate(candidate)} disabled={voteSubmitted}>
+                    Vote
+                  </button>
                 </li>
               ))}
             </ul>
@@ -67,7 +99,9 @@ const VoterDashboard = () => {
           {selectedCandidate && (
             <div>
               <p>Selected Candidate: {selectedCandidate.candidate}</p>
-              <button onClick={submitVote}>Submit Vote</button>
+              <button onClick={submitVote} disabled={voteSubmitted}>
+                Submit Vote
+              </button>
             </div>
           )}
         </div>

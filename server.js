@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const pool = require('./src/components/db');
+const authenticateUser = require('./src/components/authenticationMiddleware');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -101,7 +103,12 @@ app.post('/api/login', async (req, res) => {
 
       if (match) {
         // Successful login
-        res.status(200).json({ message: 'Login successful', user: rows[0] });
+        // Generate JWT token and send it in the response
+        const secretKey = process.env.SECRET_KEY; // Use the environment variable for the secret key
+        const token = jwt.sign({ user: rows[0] }, secretKey, { expiresIn: '30s' });
+        console.log('Server gen token',token)
+
+        res.status(200).json({ message: 'Login successful', user: rows[0], token });
       } else {
         res.status(401).json({ message: 'Invalid credentials' });
       }
@@ -113,6 +120,7 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 // Endpoint for election officer dashboard
 app.get('/api/election-officer-dashboard', async (req, res) => {
@@ -190,21 +198,21 @@ app.get('/api/candidates/:constituency', async (req, res) => {
   }
 });
 
-// Add a new API endpoint to handle vote submission
-app.post('/api/submit-vote/:candidateId', async (req, res) => {
+// Existing route
+app.post('/api/submit-vote/:candidateId', authenticateUser, async (req, res) => {
   try {
     const { candidateId } = req.params;
 
     // Example SQL queries to update candidate and mark the voter as having voted
     await pool.execute('UPDATE `candidate` SET `vote_count` = `vote_count` + 1, `elected` = 1 WHERE `canid` = ?', [candidateId]);
+
     // Update the voter's table to mark them as having voted
     if (req.user && req.user.voter_id) {
-      await pool.execute('UPDATE `voters` SET `voted` = 1 WHERE `voter_id` = ?', [req.user.voter_id]);
+      await pool.execute('UPDATE `voters` SET `vote` = 1 WHERE `voter_id` = ?', [req.user.voter_id]);
     } else {
       console.error('User is not authenticated or missing voter_id');
-      res.status(401).json({ message: 'User not authenticated or missing voter_id' });
+      return res.status(401).json({ message: 'User not authenticated or missing voter_id' });
     }
-    
 
     res.status(200).json({ message: 'Vote submitted successfully' });
   } catch (error) {
@@ -212,6 +220,8 @@ app.post('/api/submit-vote/:candidateId', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
 
 
 

@@ -156,6 +156,7 @@ CREATE TABLE `voters` (
   `password` longtext,
   `UVC` varchar(45) DEFAULT NULL,
   `constituency_id` int DEFAULT NULL,
+  `vote` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`voter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

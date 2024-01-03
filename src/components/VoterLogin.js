@@ -1,4 +1,3 @@
-// components/VoterLogin.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,9 +15,8 @@ const VoterLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
-      // Send login data to the server for validation
       const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: {
@@ -26,37 +24,30 @@ const VoterLogin = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
-        // Login successful
         const responseData = await response.json();
-        const selectedConstituencyId = responseData.user.constituency_id;
-  
-        // Retrieve the constituency name based on the saved constituency_id
-        const constituencyResponse = await fetch(`http://localhost:3001/api/constituency/${selectedConstituencyId}`);
-        const constituencyData = await constituencyResponse.json();
-        const selectedConstituencyName = constituencyData.constituency_name;
-  
-        console.log('Login successful');
-        // Redirect to VoterDashboard with the selected constituency name
-        navigate('/voter-dashboard', { state: { selectedConstituency: selectedConstituencyName } });
+
+        // Extract the token and user information from the response
+        const { token, user } = responseData;
+
+        // Save the token to localStorage
+        localStorage.setItem('jwtToken', token);
+
+        // Redirect to the dashboard and pass the user information
+        navigate('/voter-dashboard', { state: { selectedConstituency: user.constituency_name, user } });
       } else {
-        // Login failed
         console.error('Login failed:', response.statusText);
         if (response.status === 401) {
-          // Unauthorized - Incorrect email or password
           alert('Incorrect email or password. Please try again.');
         } else {
-          // Other login errors
           alert('Login failed. Please try again.');
         }
       }
     } catch (error) {
       console.error('Error during login:', error.message);
-      // Handle other errors (network issues, etc.)
     }
   };
-  
 
   return (
     <div>
