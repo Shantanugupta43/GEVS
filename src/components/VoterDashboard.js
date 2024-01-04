@@ -1,3 +1,4 @@
+// components/VoterDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -6,6 +7,7 @@ const VoterDashboard = () => {
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [voteSubmitted, setVoteSubmitted] = useState(false);
+  const [electionStatus, setElectionStatus] = useState('');
 
   const selectedConstituency = location.state?.selectedConstituency;
 
@@ -23,33 +25,47 @@ const VoterDashboard = () => {
     }
   }, [selectedConstituency]);
 
+  const fetchElectionStatus = useCallback(() => {
+    fetch('http://localhost:3001/api/election-status')
+      .then((response) => response.json())
+      .then((data) => {
+        setElectionStatus(data.status);
+      })
+      .catch((error) => {
+        console.error('Error fetching election status:', error);
+      });
+  }, []);
+
   useEffect(() => {
+    // Fetch election status when the component mounts
+    fetchElectionStatus();
+
     // Fetch candidates when the component mounts
     fetchCandidates();
-  }, [fetchCandidates]);
+  }, [fetchCandidates, fetchElectionStatus]);
 
   const submitVote = () => {
     if (voteSubmitted) {
       console.log('You have already voted.');
       return;
     }
-  
+
     const token = localStorage.getItem('jwtToken');
     console.log('Stored Token:', token);
-  
+
     if (!token) {
       // Token not found, user is not authenticated
       console.log('User not authenticated. Please log in.');
       // You can redirect to the login page or show an appropriate message
       return;
     }
-  
+
     if (selectedCandidate) {
       fetch(`http://localhost:3001/api/submit-vote/${selectedCandidate.canid}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       })
         .then((response) => {
@@ -72,13 +88,15 @@ const VoterDashboard = () => {
         });
     }
   };
-  
-  
 
   return (
     <div>
       <h2>Voter Dashboard</h2>
-      {selectedConstituency ? (
+      {electionStatus === 'not-started' && (
+        <p>Election has not started yet. Please wait for the election officer to start the election.</p>
+      )}
+
+      {electionStatus === 'started' && selectedConstituency && (
         <div>
           <h3>Candidates for {selectedConstituency}</h3>
           {candidates.length > 0 ? (
@@ -105,9 +123,11 @@ const VoterDashboard = () => {
             </div>
           )}
         </div>
-      ) : (
-        <p>Please register and select a constituency to view candidates.</p>
       )}
+
+      {electionStatus === 'ended' && <p>Election has ended. Voting is closed.</p>}
+
+      {!selectedConstituency && <p>Please register and select a constituency to view candidates.</p>}
     </div>
   );
 };

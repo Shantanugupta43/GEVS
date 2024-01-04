@@ -26,8 +26,68 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Endpoint for user registration
-// Endpoint for user registration
+
+app.get('/api/election-status', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT election_status FROM election_status WHERE id = 1');
+    console.log('Query Result:', result);
+
+    if (result && result[0] && result[0][0] && 'election_status' in result[0][0]) {
+      const electionStatus = result[0][0].election_status;
+
+      if (electionStatus == 0) {
+        res.status(200).json({ status: 'not-started' });
+      } else if (electionStatus == 1) {
+        res.status(200).json({ status: 'started' });
+      } else if (electionStatus == 2) {
+        res.status(200).json({ status: 'ended' });
+      }
+    } else {
+      console.error('Unexpected query result format or missing data.');
+      res.status(200).json({ status: 'not-started' });
+    }
+  } catch (error) {
+    console.error('Error executing the query:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+
+// Endpoint to start the election
+// Endpoint to start the election
+// Endpoint to start the election
+app.post('/api/start-election', async (req, res) => {
+  try {
+    // Implement the logic to start the election
+    // Update the 'election_status' in the 'election_status' table to 1 (started)
+    await pool.query('UPDATE election_status SET election_status = 1 WHERE id = 1');
+
+    res.status(200).json({ message: 'Election started successfully', status: 'started' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// Endpoint to end the election
+app.post('/api/end-election', async (req, res) => {
+  try {
+    // Implement the logic to end the election
+    // Update the 'election_status' in the 'election_status' table to 2 (ended)
+    await pool.query('UPDATE election_status SET election_status = 2 WHERE id = 1');
+
+    res.status(200).json({ message: 'Election ended successfully', status: 'ended' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
 // Endpoint for user registration
 app.post('/api/register', async (req, res) => {
   try {
@@ -133,6 +193,11 @@ app.get('/api/election-officer-dashboard', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+
+
+
 
 app.post('/api/adminlogin', async (req, res) => {
   try {

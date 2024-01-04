@@ -178,6 +178,21 @@ CREATE TABLE `admin` (
 INSERT INTO `admin` (`admin_email`, `password`) VALUES
 ('election@shangrila.gov.sr', '$2a$10$/Y.7DYsRdCx86hOooKo5e.tiHHlxbkl1OvVTvkozh1yXA3oS4dxZK');
 
+
+
+-- Table structure for table `election_status`
+DROP TABLE IF EXISTS `election_status`;
+
+CREATE TABLE election_status (
+  id SERIAL PRIMARY KEY,
+  election_status INT NOT NULL DEFAULT 0 -- Use 0 for not started, 1 for started, 2 for ended
+);
+
+INSERT INTO election_status (election_status) VALUES (0);
+
+
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
