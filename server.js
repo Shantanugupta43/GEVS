@@ -27,10 +27,39 @@ app.get('/api/health', async (req, res) => {
 });
 
 
+app.get('/api/election-results', async (req, res) => {
+  try {
+    const [constituencyRows, constituencyFields] = await pool.execute('SELECT * FROM constituency');
+
+    const results = [];
+
+    for (const constituency of constituencyRows) {
+      const [candidateRows, candidateFields] = await pool.execute(
+        'SELECT candidate.canid, candidate.candidate, party.party, candidate.vote_count FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = ? ORDER BY candidate.canid', // Add ORDER BY clause
+        [constituency.constituency_id]
+      );
+
+      const constituencyResult = {
+        constituency: constituency.constituency_name,
+        candidates: candidateRows,
+      };
+
+      results.push(constituencyResult);
+    }
+
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
 app.get('/api/election-status', async (req, res) => {
   try {
     const result = await pool.query('SELECT election_status FROM election_status WHERE id = 1');
-    console.log('Query Result:', result);
+
 
     if (result && result[0] && result[0][0] && 'election_status' in result[0][0]) {
       const electionStatus = result[0][0].election_status;
@@ -165,7 +194,7 @@ app.post('/api/login', async (req, res) => {
         // Successful login
         // Generate JWT token and send it in the response
         const secretKey = process.env.SECRET_KEY; // Use the environment variable for the secret key
-        const token = jwt.sign({ user: rows[0] }, secretKey, { expiresIn: '5m' });
+        const token = jwt.sign({ user: rows[0] }, secretKey, { expiresIn: '40m' });
         console.log('Server gen token',token)
 
         res.status(200).json({ message: 'Login successful', user: rows[0], token });
@@ -268,8 +297,8 @@ app.post('/api/submit-vote/:candidateId', authenticateUser, async (req, res) => 
   try {
     const { candidateId } = req.params;
 
-    // Example SQL queries to update candidate and mark the voter as having voted
-    await pool.execute('UPDATE `candidate` SET `vote_count` = `vote_count` + 1, `elected` = 1 WHERE `canid` = ?', [candidateId]);
+    // Corrected SQL query to update candidate vote count
+    await pool.execute('UPDATE `candidate` SET `vote_count` = `vote_count` + 1 WHERE `canid` = ?', [candidateId]);
 
     // Update the voter's table to mark them as having voted
     if (req.user && req.user.voter_id) {
@@ -285,6 +314,7 @@ app.post('/api/submit-vote/:candidateId', authenticateUser, async (req, res) => 
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 
 
