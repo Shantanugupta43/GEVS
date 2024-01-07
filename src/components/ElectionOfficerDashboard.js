@@ -116,26 +116,45 @@ const ElectionOfficerDashboard = () => {
   
 
   useEffect(() => {
+    const fetchDataInterval = async () => {
+      await fetchElectionData();
+    };
+
+    const intervalId = setInterval(fetchDataInterval, 5000);
+
+    // Clear the interval when the component unmounts
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []); // Run once on component mount
+
+  useEffect(() => {
     // Fetch initial election status when the component mounts
     fetchElectionStatus();
     fetchElectionResults();
-  }, []);
+
+    // Check if the election is started, and initiate the interval if true
+    if (electionStatus === 'started') {
+      const intervalId = setInterval(fetchElectionData, 5000);
+      setRefreshIntervalId(intervalId);
+    }
+  }, [electionStatus]); // Re-run when election status changes
 
   const prepareChartData = () => {
     if (!electionResults) return null;
-  
+
     const allCandidates = Array.from(
       new Set(electionResults.flatMap(result => result.candidates.map(candidate => candidate.candidate)))
     );
-  
+
     const allParties = Array.from(
       new Set(electionResults.flatMap(result => result.candidates.map(candidate => candidate.party)))
     );
-  
+
     const datasets = [];
     let maxVoteCount = 0;
-  
-    electionResults.forEach(result => {
+
+    electionResults.forEach((result, index) => {
       const candidates = result.candidates;
       const dataset = {
         label: result.constituency,
@@ -145,26 +164,31 @@ const ElectionOfficerDashboard = () => {
           maxVoteCount = Math.max(maxVoteCount, voteCount);
           return voteCount;
         }),
-        backgroundColor: getRandomColor(),
+        backgroundColor: getFixedColor(index),
       };
-  
+
       datasets.push(dataset);
     });
-  
+
     // Calculate the suggestedMax based on the maximum vote count
     const suggestedMax = Math.ceil((maxVoteCount + 1) / 5) * 5;
-  
+
     return { labels: allCandidates, datasets, suggestedMax, parties: allParties };
   };
 
-  const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+  const fixedColors = [
+    '#FF5733', // Color for the first constituency
+    '#33FF57', // Color for the second constituency
+    '#5733FF', // Color for the third constituency
+    '#55157a',  // Color for the fourth constituency
+    '#00FFEG', // Color for the fifth constituency
+  ];
+
+  const getFixedColor = (index) => {
+    // Use modulo to cycle through colors if there are more constituencies than fixed colors
+    return fixedColors[index % fixedColors.length];
   };
+
 
 
   const determineElectionOutcome = () => {
@@ -199,7 +223,7 @@ const ElectionOfficerDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="layout">
       <h2>Election Officer Dashboard</h2>
       <button onClick={startElection} disabled={electionStatus === 'started'}>
         Start Election

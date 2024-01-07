@@ -56,7 +56,7 @@ const VoterLogin = () => {
   };
 
   return (
-    <div>
+    <div className="layout">
       <h2>Voter Login</h2>
       <form onSubmit={handleSubmit}>
         <div>

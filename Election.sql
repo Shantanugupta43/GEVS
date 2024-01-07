@@ -157,6 +157,8 @@ CREATE TABLE `voters` (
   `UVC` varchar(45) DEFAULT NULL,
   `constituency_id` int DEFAULT NULL,
   `vote` INT NOT NULL DEFAULT 0,
+  `chosen_candidate` varchar(255) DEFAULT NULL,
+  `chosen_party` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`voter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -189,6 +191,8 @@ CREATE TABLE election_status (
 );
 
 INSERT INTO election_status (election_status) VALUES (0);
+
+
 
 
 

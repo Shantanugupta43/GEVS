@@ -1,0 +1,79 @@
+/* Navbar.css */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+  }
+  
+.navcomponents {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    text-align: end;
+  }
+
+  li{
+    list-style-type: none;
+  }
+  
+  a {
+    text-decoration: none;
+    color: white;
+  }
+
+
+
+  .snippetlogin{
+    text-decoration: none;
+    color: rgb(214, 69, 32);
+
+  }
+  
+  img {
+    width: 170px;
+    height: 102px;
+}
+  
+.layout{
+  margin: 20px;
+}
+
+
+button{
+
+  display: inline-block;
+  padding: 6px 20px;
+  background-color: #000; /* Black background color */
+  color: #fff; /* White text color */
+  border-radius: 25px; /* Adjust the border-radius for the desired level of rounding */
+  margin-right: 10px;
+  cursor: pointer;
+  margin-top:20px;
+  text-decoration: none;
+}
+
+
+
+form div {
+  margin-bottom: 15px; /* Adjust the value as needed */
+  display: flex;
+  flex-direction: row; /* Place label and input side by side */
+  align-items: center; /* Align items vertically centered */
+}
+
+form label {
+  margin-right: 10px; /* Adjust the value as needed */
+}
+
+
+form input,
+form select {
+  width: 20%;
+  padding: 2px;
+  box-sizing: border-box;
+}

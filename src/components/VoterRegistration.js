@@ -20,8 +20,6 @@ const VoterRegistration = () => {
   const [uvcError, setUvcError] = useState('');
   const [emailError, setEmailError] = useState('');
 
-  const [selectedConstituency, setSelectedConstituency] = useState('');
-
   const [isCameraEnabled, setCameraEnabled] = useState(false);
 
   const handleChange = (e) => {
@@ -59,6 +57,10 @@ const VoterRegistration = () => {
     setCameraEnabled(true);
   };
 
+  const handleDisableCamera = () => {
+    setCameraEnabled(false);
+  };
+
   const onResult = (result, error) => {
     if (!!error) {
       console.info(error);
@@ -70,17 +72,18 @@ const VoterRegistration = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Check if password and confirm password match
     if (formData.password !== formData.confirmPassword) {
       setPasswordError('Password and Confirm Password do not match.');
+      return;
     } else {
       setPasswordError('');
     }
-  
+
     try {
       console.log('Submitting Form Data:', formData);
-  
+
       const response = await fetch('http://localhost:3001/api/register', {
         method: 'POST',
         headers: {
@@ -88,10 +91,13 @@ const VoterRegistration = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
         console.log('Registration successful');
-        navigate('/voter-dashboard', { state: { selectedConstituency } });
+
+        // Navigate to the login page after successful registration
+        navigate('/login');
+        alert('Registration successful! Login again to start voting.')
       } else {
         console.error('Registration failed:', response.statusText);
         if (response.status === 400) {
@@ -103,7 +109,7 @@ const VoterRegistration = () => {
           } else {
             setUvcError('UVC validation failed. Please check your information.');
           }
-  
+
           // Check if it's a UVC error and handle accordingly
           if (responseData.uvcError) {
             setUvcError('Invalid UVC code or already used. Please check your information.');
@@ -118,9 +124,9 @@ const VoterRegistration = () => {
   };
 
   return (
-    <div>
+    <div className="layout">
       <h2>Voter Registration</h2>
-      
+
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email">Email:</label>
@@ -187,8 +193,6 @@ const VoterRegistration = () => {
             value={formData.constituency}
             onChange={(e) => {
               handleTownChange(e);
-              // Update: Store the selected constituency in the state
-              setSelectedConstituency(e.target.value);
             }}
             required
           >
@@ -220,11 +224,14 @@ const VoterRegistration = () => {
         <button type="button" onClick={handleEnableCamera}>
           Enable Camera
         </button>
+        <button type="button" onClick={handleDisableCamera}>
+            Disable Camera
+        </button>
         <button type="submit">Register</button>
       </form>
 
       <p>
-        Already registered? <Link to="/login">Login here</Link>
+        Already registered? <Link to="/login" className="snippetlogin">Login here</Link>
       </p>
     </div>
   );

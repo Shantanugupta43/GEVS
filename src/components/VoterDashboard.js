@@ -1,9 +1,10 @@
 // components/VoterDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const VoterDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [voteSubmitted, setVoteSubmitted] = useState(false);
@@ -82,6 +83,9 @@ const VoterDashboard = () => {
         .then((data) => {
           console.log('Vote submitted successfully', data);
           setVoteSubmitted(true);
+
+          navigate('/success');
+
         })
         .catch((error) => {
           console.error('Error submitting vote:', error.message);
@@ -90,7 +94,7 @@ const VoterDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="layout">
       <h2>Voter Dashboard</h2>
       {electionStatus === 'not-started' && (
         <p>Election has not started yet. Please wait for the election officer to start the election.</p>

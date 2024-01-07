@@ -48,7 +48,7 @@ const OfficerLogin = () => {
   };
 
   return (
-    <div>
+    <div className="layout">
       <h2>Officer Login</h2>
 
       <form onSubmit={handleSubmit}>

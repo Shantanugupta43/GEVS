@@ -292,28 +292,212 @@ app.get('/api/candidates/:constituency', async (req, res) => {
   }
 });
 
-// Existing route
+app.get('/api/chosen-details', authenticateUser, async (req, res) => {
+  try {
+    if (req.user && req.user.voter_id) {
+      const [chosenDetailsRows, chosenDetailsFields] = await pool.execute(
+        'SELECT candidate.candidate AS chosenCandidate, party.party AS chosenParty FROM voters ' +
+        'LEFT JOIN candidate ON voters.chosen_candidate = candidate.canid ' +
+        'LEFT JOIN party ON candidate.party_id = party.party_id ' +
+        'WHERE voters.voter_id = ?',
+        [req.user.voter_id]
+      );
+
+      if (chosenDetailsRows.length === 1) {
+        const { chosenCandidate, chosenParty } = chosenDetailsRows[0];
+
+        // Include user and token in the response for demonstration purposes
+        res.status(200).json({ chosenCandidate, chosenParty, user: req.user, token: req.token });
+      } else {
+        res.status(404).json({ message: 'Chosen details not found' });
+      }
+    } else {
+      console.error('User is not authenticated or missing voter_id');
+      res.status(401).json({ message: 'User not authenticated or missing voter_id' });
+    }
+  } catch (error) {
+    console.error('Error in /api/chosen-details:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+// Endpoint to submit a vote
 app.post('/api/submit-vote/:candidateId', authenticateUser, async (req, res) => {
   try {
     const { candidateId } = req.params;
 
-    // Corrected SQL query to update candidate vote count
-    await pool.execute('UPDATE `candidate` SET `vote_count` = `vote_count` + 1 WHERE `canid` = ?', [candidateId]);
-
-    // Update the voter's table to mark them as having voted
-    if (req.user && req.user.voter_id) {
-      await pool.execute('UPDATE `voters` SET `vote` = 1 WHERE `voter_id` = ?', [req.user.voter_id]);
-    } else {
-      console.error('User is not authenticated or missing voter_id');
-      return res.status(401).json({ message: 'User not authenticated or missing voter_id' });
+    // Check if the user has already voted
+    if (req.user && req.user.voter_id && req.user.vote === 1) {
+      return res.status(400).json({ message: 'User has already voted' });
     }
 
-    res.status(200).json({ message: 'Vote submitted successfully' });
+    const [candidateRows, candidateFields] = await pool.execute(
+      'SELECT candidate.candidate, party.party FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.canid = ?',
+      [candidateId]
+    );
+
+    if (candidateRows.length === 1) {
+      const chosenCandidate = candidateRows[0].candidate;
+      const chosenParty = candidateRows[0].party;
+
+      // Update the candidate's vote count
+      await pool.execute('UPDATE `candidate` SET `vote_count` = `vote_count` + 1 WHERE `canid` = ?', [candidateId]);
+
+      if (req.user && req.user.voter_id) {
+        // Update `voters` table with vote information and chosen details
+        await pool.execute(
+          'UPDATE `voters` SET `vote` = 1, `chosen_candidate` = ?, `chosen_party` = ? WHERE `voter_id` = ?',
+          [chosenCandidate, chosenParty, req.user.voter_id]
+        );
+
+        // Fetch updated voter details after the vote is submitted
+        const [updatedVoterRows, updatedVoterFields] = await pool.execute(
+          'SELECT * FROM voters WHERE voter_id = ?',
+          [req.user.voter_id]
+        );
+
+        if (updatedVoterRows.length === 1) {
+          const updatedVoter = updatedVoterRows[0];
+          // Include user and token in the response for demonstration purposes
+          return res.status(200).json({
+            message: 'Vote submitted successfully',
+            updatedVoter,
+            chosenCandidate,
+            chosenParty,
+            user: req.user,
+            token: req.token,
+          });
+        } else {
+          console.error('Error fetching updated voter details after vote submission');
+          return res.status(500).json({ message: 'Internal Server Error' });
+        }
+      } else {
+        console.error('User is not authenticated or missing voter_id');
+        return res.status(401).json({ message: 'User not authenticated or missing voter_id' });
+      }
+    } else {
+      // Candidate not found
+      console.error('Candidate details not found for candidateId:', candidateId);
+      return res.status(404).json({ message: 'Candidate details not found' });
+    }
+  } catch (error) {
+    console.error('Error in /api/submit-vote:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+
+
+app.set('json spaces', 2);
+
+app.get('/gevs/constituency/:constituencyName', async (req, res) => {
+  try {
+    const { constituencyName } = req.params;
+    
+    // Fetch the constituency data based on the provided name
+    const [constituencyRows, constituencyFields] = await pool.execute(
+      'SELECT candidate.candidate, party.party, candidate.vote_count FROM candidate JOIN party ON candidate.party_id = party.party_id JOIN constituency ON candidate.constituency_id = constituency.constituency_id WHERE constituency.constituency_name = ?',
+      [constituencyName]
+    );
+
+    if (constituencyRows.length > 0) {
+      // Prepare the response JSON
+      const responseJson = {
+        constituency: constituencyName,
+        result: constituencyRows.map(candidate => ({
+          name: candidate.candidate,
+          party: candidate.party,
+          vote: candidate.vote_count,
+        })),
+      };
+
+      // Send the response
+      res.status(200).json(responseJson, null, 2);
+    } else {
+      // Constituency not found
+      res.status(404).json({ message: 'Constituency not found' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+app.get('/gevs/results', async (req, res) => {
+  try {
+    const [constituencyRows, constituencyFields] = await pool.execute('SELECT * FROM constituency');
+
+    const results = [];
+
+    for (const constituency of constituencyRows) {
+      const [candidateRows, candidateFields] = await pool.execute(
+        'SELECT candidate.canid, candidate.candidate, party.party, candidate.vote_count FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = ? ORDER BY candidate.canid',
+        [constituency.constituency_id]
+      );
+
+      const constituencyResult = {
+        constituency: constituency.constituency_name,
+        candidates: candidateRows,
+      };
+
+      results.push(constituencyResult);
+    }
+
+    const electionStatusResult = await pool.query('SELECT election_status FROM election_status WHERE id = 1');
+    const electionStatus = electionStatusResult[0][0].election_status;
+
+    let responseStatus = 'Pending';
+    let winner = 'Pending'; // Set winner to 'Pending' initially
+    let partyVotes; // Define partyVotes here
+
+    // Calculate election outcome regardless of the election status
+    const parties = Array.from(new Set(results.flatMap(result => result.candidates.map(candidate => candidate.party))));
+
+    partyVotes = parties.map(party => ({
+      party,
+      totalVotes: results.reduce((total, result) => {
+        const partyResult = result.candidates.find(candidate => candidate.party === party);
+        return total + (partyResult ? partyResult.vote_count : 0);
+      }, 0),
+    }));
+
+    const totalVotes = partyVotes.reduce((total, party) => total + party.totalVotes, 0);
+
+    if (electionStatus === 2) {
+      // Election has ended
+      responseStatus = 'Completed';
+
+      const winningParty = partyVotes.reduce((max, party) => (party.totalVotes > max.totalVotes ? party : max), partyVotes[0]);
+
+      if (winningParty.totalVotes > totalVotes / 2) {
+        winner = winningParty.party;
+      } else {
+        // No party secured an overall majority
+        winner = 'Hung Parliament';
+      }
+    }
+
+    const seats = partyVotes.map(party => ({
+      party: party.party,
+      seat: Math.floor(party.totalVotes), // Seats directly proportional to total votes
+    }));
+
+    res.status(200).json({ status: responseStatus, winner, seats });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+
+
 
 
 
