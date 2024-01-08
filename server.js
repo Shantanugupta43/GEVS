@@ -430,13 +430,13 @@ app.get('/gevs/constituency/:constituencyName', async (req, res) => {
 
 app.get('/gevs/results', async (req, res) => {
   try {
+    // Fetch constituency results
     const [constituencyRows, constituencyFields] = await pool.execute('SELECT * FROM constituency');
-
     const results = [];
 
     for (const constituency of constituencyRows) {
       const [candidateRows, candidateFields] = await pool.execute(
-        'SELECT candidate.canid, candidate.candidate, party.party, candidate.vote_count FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = ? ORDER BY candidate.canid',
+        'SELECT candidate.canid, candidate.candidate, party.party, candidate.vote_count FROM candidate JOIN party ON candidate.party_id = party.party_id WHERE candidate.constituency_id = ? ORDER BY candidate.vote_count DESC',
         [constituency.constituency_id]
       );
 
@@ -448,44 +448,40 @@ app.get('/gevs/results', async (req, res) => {
       results.push(constituencyResult);
     }
 
+    // Fetch election status
     const electionStatusResult = await pool.query('SELECT election_status FROM election_status WHERE id = 1');
     const electionStatus = electionStatusResult[0][0].election_status;
 
     let responseStatus = 'Pending';
-    let winner = 'Pending'; // Set winner to 'Pending' initially
-    let partyVotes; // Define partyVotes here
+    let winner = 'Pending';
+    let seats = [];
 
-    // Calculate election outcome regardless of the election status
+    const totalSeats = 5; // Assuming there are 5 seats in total
     const parties = Array.from(new Set(results.flatMap(result => result.candidates.map(candidate => candidate.party))));
 
-    partyVotes = parties.map(party => ({
-      party,
-      totalVotes: results.reduce((total, result) => {
+    seats = parties.map(party => ({
+      party: party,
+      seat: results.reduce((total, result) => {
         const partyResult = result.candidates.find(candidate => candidate.party === party);
-        return total + (partyResult ? partyResult.vote_count : 0);
+        return total + (partyResult && partyResult.vote_count > 0 ? 1 : 0); // Award 1 seat if the party has votes in the constituency
       }, 0),
     }));
-
-    const totalVotes = partyVotes.reduce((total, party) => total + party.totalVotes, 0);
 
     if (electionStatus === 2) {
       // Election has ended
       responseStatus = 'Completed';
 
-      const winningParty = partyVotes.reduce((max, party) => (party.totalVotes > max.totalVotes ? party : max), partyVotes[0]);
+      // Find the winning party
+      const totalSeatsWon = seats.reduce((total, party) => total + party.seat, 0);
 
-      if (winningParty.totalVotes > totalVotes / 2) {
-        winner = winningParty.party;
+      if (totalSeatsWon > totalSeats / 2) {
+        // Winner party gains an overall majority
+        winner = seats.reduce((max, party) => (party.seat > max.seat ? party : max), seats[0]).party;
       } else {
         // No party secured an overall majority
         winner = 'Hung Parliament';
       }
     }
-
-    const seats = partyVotes.map(party => ({
-      party: party.party,
-      seat: Math.floor(party.totalVotes), // Seats directly proportional to total votes
-    }));
 
     res.status(200).json({ status: responseStatus, winner, seats });
   } catch (error) {
@@ -493,6 +489,8 @@ app.get('/gevs/results', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
 
 
 

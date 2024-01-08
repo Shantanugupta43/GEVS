@@ -10,6 +10,38 @@ const ElectionOfficerDashboard = () => {
   const [electionStatus, setElectionStatus] = useState('');
   const [electionResults, setElectionResults] = useState(null);
   const [refreshIntervalId, setRefreshIntervalId] = useState(null);
+  const [winner, setWinner] = useState('');
+  const [seats, setSeats] = useState([]);
+
+  const fetchWinnerAndSeats = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/gevs/results');
+      if (response.ok) {
+        const data = await response.json();
+        setMessage(`Election status: ${data.status}`);
+        setWinner(data.winner);
+        setSeats(data.seats);
+      } else {
+        console.error('Failed to fetch winner and seats:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching winner and seats:', error.message);
+    }
+  };
+
+  const fetchSeats = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/gevs/results');
+      if (response.ok) {
+        const data = await response.json();
+        setSeats(data.seats);
+      } else {
+        console.error('Failed to fetch seats:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching seats:', error.message);
+    }
+  };
 
   const fetchElectionResults = async () => {
     try {
@@ -73,7 +105,7 @@ const ElectionOfficerDashboard = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.ok) {
         setMessage('Election started successfully');
         // Fetch election data initially
@@ -87,9 +119,6 @@ const ElectionOfficerDashboard = () => {
       console.error('Error starting election:', error.message);
     }
   };
-  
-
-  
 
   const endElection = async () => {
     try {
@@ -99,7 +128,7 @@ const ElectionOfficerDashboard = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.ok) {
         setMessage('Election ended successfully');
         // Clear the refresh interval
@@ -113,7 +142,6 @@ const ElectionOfficerDashboard = () => {
       console.error('Error ending election:', error.message);
     }
   };
-  
 
   useEffect(() => {
     const fetchDataInterval = async () => {
@@ -129,6 +157,8 @@ const ElectionOfficerDashboard = () => {
   }, []); // Run once on component mount
 
   useEffect(() => {
+    // Fetch initial winner and seats when the component mounts
+    fetchWinnerAndSeats();
     // Fetch initial election status when the component mounts
     fetchElectionStatus();
     fetchElectionResults();
@@ -189,39 +219,6 @@ const ElectionOfficerDashboard = () => {
     return fixedColors[index % fixedColors.length];
   };
 
-
-
-  const determineElectionOutcome = () => {
-    const parties = prepareChartData().parties;
-
-    // Calculate total votes for each party
-    const partyVotes = parties.map(party => {
-      return {
-        party,
-        totalVotes: electionResults.reduce((total, result) => {
-          const partyResult = result.candidates.find(candidate => candidate.party === party);
-          return total + (partyResult ? partyResult.vote_count : 0);
-        }, 0),
-      };
-    });
-
-    // Find the party with the maximum votes
-    const winningParty = partyVotes.reduce((max, party) => (party.totalVotes > max.totalVotes ? party : max), partyVotes[0]);
-
-    // Calculate total votes across all parties
-    const totalVotes = partyVotes.reduce((total, party) => total + party.totalVotes, 0);
-
-    // Calculate the threshold for a majority
-    const majorityThreshold = totalVotes / 2;
-
-    // Determine the election outcome
-    if (winningParty.totalVotes > majorityThreshold) {
-      return `Winner: ${winningParty.party}`;
-    } else {
-      return 'Hung Parliament';
-    }
-  };
-
   return (
     <div className="layout">
       <h2>Election Officer Dashboard</h2>
@@ -232,7 +229,7 @@ const ElectionOfficerDashboard = () => {
         End Election
       </button>
       <p>{message}</p>
-  
+
       {electionResults && (
         <div>
           <h3>Real-time Election Results</h3>
@@ -256,20 +253,20 @@ const ElectionOfficerDashboard = () => {
                     generateLabels: (chart) => {
                       const datasets = chart.data.datasets;
                       if (!datasets) return []; // Ensure datasets is defined
-  
+
                       const legendLabels = [];
-  
+
                       datasets.forEach((dataset, index) => {
                         const label = dataset.label || '';
                         const backgroundColor = dataset.backgroundColor || '';
                         const voteCount = chart.data.voteCounts ? chart.data.voteCounts[index] : '';
-  
+
                         legendLabels.push({
                           text: `${label} - ${voteCount}`,
                           fillStyle: backgroundColor,
                         });
                       });
-  
+
                       return legendLabels;
                     },
                   },
@@ -279,7 +276,23 @@ const ElectionOfficerDashboard = () => {
           />
           <div>
             <h3>Candidates and Parties</h3>
-            <p>{determineElectionOutcome()}</p>
+
+            {winner && (
+              <div>
+                <h5>Election Winner</h5>
+                <p>{`Winner: ${winner}`}</p>
+              </div>
+            )}
+
+            {seats.length > 0 && (
+              <div>
+                <h5>Seats</h5>
+                {seats.map(seat => (
+                  <p key={seat.party}>{`${seat.party}: ${seat.seat}`}</p>
+                ))}
+              </div>
+            )}
+
             {prepareChartData().parties.map(party => (
               <div key={party}>
                 <h4>{party}</h4>
@@ -303,7 +316,7 @@ const ElectionOfficerDashboard = () => {
           </div>
         </div>
       )}
-  
+
       {/* Display other election officer dashboard content */}
     </div>
   );
