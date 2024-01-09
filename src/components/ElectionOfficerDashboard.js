@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chart, CategoryScale, LinearScale, BarElement, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import '../gevsapp.css';
 
 // Register the required elements and scales
 Chart.register(CategoryScale, LinearScale, BarElement, Legend);
@@ -29,19 +30,7 @@ const ElectionOfficerDashboard = () => {
     }
   };
 
-  const fetchSeats = async () => {
-    try {
-      const response = await fetch('http://localhost:3001/gevs/results');
-      if (response.ok) {
-        const data = await response.json();
-        setSeats(data.seats);
-      } else {
-        console.error('Failed to fetch seats:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching seats:', error.message);
-    }
-  };
+
 
   const fetchElectionResults = async () => {
     try {
@@ -233,9 +222,11 @@ const ElectionOfficerDashboard = () => {
       {electionResults && (
         <div>
           <h3>Real-time Election Results</h3>
-          <Bar
+          <Bar className='Bar'
             data={prepareChartData()}
             options={{
+
+
               scales: {
                 x: { type: 'category' },
                 y: {
@@ -272,6 +263,8 @@ const ElectionOfficerDashboard = () => {
                   },
                 },
               },
+
+
             }}
           />
           <div>

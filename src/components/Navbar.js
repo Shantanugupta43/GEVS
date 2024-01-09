@@ -6,7 +6,7 @@ import gevslogo from '../image/gevslogo.png';
 const Navbar = () => {
   return (
     <nav>
-        <img src={gevslogo} alt="GEVS Logo" />
+      <img src={gevslogo} alt="GEVS Logo" />
       <ul className="navcomponents">
         <li><Link to="/">Voter Registration</Link></li>
         <li><Link to="/login">Voter Login</Link></li>
