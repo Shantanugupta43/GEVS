@@ -47,6 +47,11 @@ Use `npm start` to start the project
 
 This would open http://localhost:3000 in the web browser.
 
+This project uses 2 ports 
+
+- Port 3000 for the application
+- Port 3001 for theserver
+
 
 ## REST API calls and results 
 
@@ -127,3 +132,56 @@ result -
 
 
 ```
+
+
+### Votes per constituency, per candidate, per party
+
+
+
+API Call link -   http://localhost:3001/gevs/constituency/northern-kunlun-mountain
+
+``` northern-kunlun-mountain``` could be replaced with any constitutional name
+
+
+
+Result -
+
+
+```
+
+
+{
+  "constituency": "northern-kunlun-mountain",
+  "result": [
+    {
+      "name": "Candidate 5",
+      "party": "Blue Party",
+      "vote": 0
+    },
+    {
+      "name": "Candidate 6",
+      "party": "Red Party",
+      "vote": 0
+    },
+    {
+      "name": "Candidate 7",
+      "party": "Yellow Party",
+      "vote": 3
+    },
+    {
+      "name": "Candidate 8",
+      "party": "Independent",
+      "vote": 0
+    }
+  ]
+}
+
+
+
+```
+
+
+
+
+
+
