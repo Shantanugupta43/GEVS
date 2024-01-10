@@ -6,6 +6,9 @@ import { QrReader } from 'react-qr-reader';
 const VoterRegistration = () => {
   const navigate = useNavigate();
 
+  const today = new Date();
+  const maxDOB = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
   const [formData, setFormData] = useState({
     email: '',
     fullName: '',
@@ -82,7 +85,7 @@ const VoterRegistration = () => {
     }
 
     try {
-      console.log('Submitting Form Data:', formData);
+
 
       const response = await fetch('http://localhost:3001/api/register', {
         method: 'POST',
@@ -159,6 +162,7 @@ const VoterRegistration = () => {
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleChange}
+            max={maxDOB.toISOString().split('T')[0]}
             required
           />
         </div>

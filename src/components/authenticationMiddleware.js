@@ -5,12 +5,12 @@ const jwt = require('jsonwebtoken');
 const verifyToken = async (token) => {
   try {
     const secretKey = process.env.SECRET_KEY;
-    console.log('Attempting to verify token:', token);
-    console.log('Using secret key:', secretKey);
+
+
 
     // Decode the token to see its structure
     const decoded = jwt.decode(token, { complete: true });
-    console.log('Decoded token:', decoded);
+
 
     if (!decoded) {
       console.error('Failed to decode token.');
@@ -19,7 +19,7 @@ const verifyToken = async (token) => {
 
     // Verify the token
     const verified = jwt.verify(token, secretKey);
-    console.log('Token verified successfully. Decoded payload:', verified);
+
 
     return verified.user;
   } catch (error) {

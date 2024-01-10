@@ -52,7 +52,7 @@ const VoterDashboard = () => {
     }
 
     const token = localStorage.getItem('jwtToken');
-    console.log('Stored Token:', token);
+
 
     if (!token) {
       // Token not found, user is not authenticated
@@ -81,7 +81,7 @@ const VoterDashboard = () => {
           return response.json();
         })
         .then((data) => {
-          console.log('Vote submitted successfully', data);
+          console.log('Vote submitted successfully');
           setVoteSubmitted(true);
 
           navigate('/success');
