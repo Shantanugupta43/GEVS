@@ -24,7 +24,7 @@ SECRET_KEY=33036e729957243d3038400d7901cba42063be94db028756126f5b92245d52d0
 
 <b> NOTE: .env is exposed here for demonstration purposes </b> 
 
-To make connection successful make sure the database schema gevs is created and your own root password for database is setup.
+IMPORTANT: To make connection successful make sure the database schema gevs is created and your own root password for database is setup.
 
 The gevs database schema format is set to utf8 while creating the gevs database in Charset/Collation tab of mysql workbench.
 
@@ -35,7 +35,7 @@ After tables are created, open a new terminal and paste the code below in VS cod
 cmd.exe /c "mysql -u root -p gevs < sg691.sql"
 
 
-This  command should push the sql script inside the database schema 'gevs'
+This command should push the sql script inside the database schema 'gevs'
 
 ## Starting the project 
 
@@ -49,3 +49,81 @@ This would open http://localhost:3000 in the web browser.
 
 
 ## REST API calls and results 
+
+
+### See live election results 
+
+
+API Call link -   http://localhost:3001/gevs/results
+
+
+#### When election is ongoing
+
+result -
+
+
+```
+
+{
+  "status": "Pending",
+  "winner": "Pending",
+  "seats": [
+    {
+      "party": "Blue Party",
+      "seat": 1
+    },
+    {
+      "party": "Red Party",
+      "seat": 1
+    },
+    {
+      "party": "Yellow Party",
+      "seat": 1
+    },
+    {
+      "party": "Independent",
+      "seat": 0
+    }
+  ]
+}
+
+
+
+
+```
+
+
+#### When election is completed
+
+
+result -
+
+
+```
+
+{
+  "status": "Completed",
+  "winner": "Yellow Party",
+  "seats": [
+    {
+      "party": "Blue Party",
+      "seat": 1
+    },
+    {
+      "party": "Red Party",
+      "seat": 1
+    },
+    {
+      "party": "Yellow Party",
+      "seat": 3
+    },
+    {
+      "party": "Independent",
+      "seat": 0
+    }
+  ]
+}
+
+
+
+```

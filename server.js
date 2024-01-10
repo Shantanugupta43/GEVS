@@ -473,15 +473,29 @@ app.get('/gevs/results', async (req, res) => {
 
       // Find the winning party
       const totalSeatsWon = seats.reduce((total, party) => total + party.seat, 0);
+// Before the if statement
+console.log('Total Seats Won:', totalSeatsWon);
+console.log('Total Seats:', totalSeats);
 
-      if (totalSeatsWon > totalSeats / 2) {
-        // Winner party gains an overall majority
-        winner = seats.reduce((max, party) => (party.seat > max.seat ? party : max), seats[0]).party;
-      } else {
-        // No party secured an overall majority
-        winner = 'Hung Parliament';
-      }
+const halfTotalSeats = Math.ceil(totalSeats / 2);
+console.log('Half of Total Seats Calculation:', halfTotalSeats);
+
+const partiesWithoutMajority = seats.filter(party => party.seat < halfTotalSeats);
+
+if (partiesWithoutMajority.length === seats.length) {
+  // No party secured an overall majority
+  console.log('Inside if statement');
+  winner = 'Hung Parliament';
+} else {
+  // Winner party gains an overall majority
+  console.log('Inside else statement');
+  winner = seats.reduce((max, party) => (party.seat > max.seat ? party : max), seats[0]).party;
+console.log('Winner:', winner);
+}
     }
+
+
+
 
     res.status(200).json({ status: responseStatus, winner, seats });
   } catch (error) {
