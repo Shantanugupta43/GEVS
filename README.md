@@ -50,7 +50,7 @@ This would open http://localhost:3000 in the web browser.
 This project uses 2 ports 
 
 - Port 3000 for the application
-- Port 3001 for theserver
+- Port 3001 for the server
 
 
 ## REST API calls and results 
