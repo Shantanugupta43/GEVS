@@ -15,7 +15,7 @@ const VoterDashboard = () => {
   // Define fetchCandidates using useCallback
   const fetchCandidates = useCallback(() => {
     if (selectedConstituency) {
-      fetch(`http://localhost:3001/api/candidates/${selectedConstituency}`)
+      fetch(`https://gevs-9fedf25d0d77.herokuapp.com/api/candidates/${selectedConstituency}`)
         .then((response) => response.json())
         .then((data) => {
           setCandidates(data.candidates);
@@ -27,7 +27,7 @@ const VoterDashboard = () => {
   }, [selectedConstituency]);
 
   const fetchElectionStatus = useCallback(() => {
-    fetch('http://localhost:3001/api/election-status')
+    fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/election-status')
       .then((response) => response.json())
       .then((data) => {
         setElectionStatus(data.status);
@@ -62,7 +62,7 @@ const VoterDashboard = () => {
     }
 
     if (selectedCandidate) {
-      fetch(`http://localhost:3001/api/submit-vote/${selectedCandidate.canid}`, {
+      fetch(`https://gevs-9fedf25d0d77.herokuapp.com/api/submit-vote/${selectedCandidate.canid}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
