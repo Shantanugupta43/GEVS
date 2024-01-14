@@ -1,1 +1,1 @@
-web: npm ci --production && npm start
+web: npm start
