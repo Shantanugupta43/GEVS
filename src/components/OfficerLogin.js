@@ -20,7 +20,7 @@ const OfficerLogin = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/adminlogin', {
+      const response = await fetch('/api/adminlogin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

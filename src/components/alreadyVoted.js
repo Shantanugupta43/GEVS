@@ -19,7 +19,7 @@ const AlreadyVoted = () => {
           return;
         }
 
-        const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/chosen-details', {
+        const response = await fetch('/api/chosen-details', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
