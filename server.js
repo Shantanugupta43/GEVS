@@ -5,21 +5,12 @@ const bcrypt = require('bcrypt');
 const pool = require('./src/components/db');
 const authenticateUser = require('./src/components/authenticationMiddleware');
 const jwt = require('jsonwebtoken');
-const path = require('path'); // Import the path module
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
-
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-// Handle other routes and return the React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-});
 
 // Salt rounds for bcrypt hashing
 const saltRounds = 10;
