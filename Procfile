@@ -1,1 +1,1 @@
-web: sh -c 'npm run start-server && npm run start-react'
+web: npm start
