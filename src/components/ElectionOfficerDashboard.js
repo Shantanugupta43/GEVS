@@ -16,7 +16,7 @@ const ElectionOfficerDashboard = () => {
 
   const fetchWinnerAndSeats = async () => {
     try {
-      const response = await fetch('/gevs/results');
+      const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/gevs/results');
       if (response.ok) {
         const data = await response.json();
         setMessage(`Election status: ${data.status}`);
@@ -34,7 +34,7 @@ const ElectionOfficerDashboard = () => {
 
   const fetchElectionResults = async () => {
     try {
-      const response = await fetch('/api/election-results');
+      const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/election-results');
       if (response.ok) {
         const data = await response.json();
         setElectionResults(data.results);
@@ -49,7 +49,7 @@ const ElectionOfficerDashboard = () => {
   const fetchElectionData = async () => {
     try {
       // Fetch election status
-      const statusResponse = await fetch('/api/election-status');
+      const statusResponse = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/election-status');
       if (statusResponse.ok) {
         const statusData = await statusResponse.json();
         setElectionStatus(statusData.status);
@@ -59,7 +59,7 @@ const ElectionOfficerDashboard = () => {
       }
 
       // Fetch election results
-      const resultsResponse = await fetch('/api/election-results');
+      const resultsResponse = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/election-results');
       if (resultsResponse.ok) {
         const resultsData = await resultsResponse.json();
         setElectionResults(resultsData.results);
@@ -73,7 +73,7 @@ const ElectionOfficerDashboard = () => {
 
   const fetchElectionStatus = async () => {
     try {
-      const response = await fetch('/api/election-status');
+      const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/election-status');
       if (response.ok) {
         const data = await response.json();
         setElectionStatus(data.status);
@@ -88,7 +88,7 @@ const ElectionOfficerDashboard = () => {
 
   const startElection = async () => {
     try {
-      const response = await fetch('/api/start-election', {
+      const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/start-election', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const ElectionOfficerDashboard = () => {
 
   const endElection = async () => {
     try {
-      const response = await fetch('/api/end-election', {
+      const response = await fetch('https://gevs-9fedf25d0d77.herokuapp.com/api/end-election', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
