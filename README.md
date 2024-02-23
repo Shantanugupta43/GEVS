@@ -22,7 +22,7 @@ SECRET_KEY=33036e729957243d3038400d7901cba42063be94db028756126f5b92245d52d0
 
 ```
 
-<b> NOTE: .env is exposed here for demonstration purposes </b> 
+<b> NOTE: .env is exposed here for demonstration purposes and just for try/ testing purposes. Displaying credentials for security is not advisable/ </b> 
 
 IMPORTANT: To make connection successful make sure the database schema gevs is created and your own root password for database is setup.
 
