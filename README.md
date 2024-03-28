@@ -2,7 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Election officer dashboard admin credentials -
+## Election officer dashboard admin (officer login) credentials -
 
 Username - election@shangrila.gov.sr
 Password - shangrila2024$
