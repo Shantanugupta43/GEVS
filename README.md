@@ -2,6 +2,11 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Election officer dashboard admin credentials -
+
+Username - election@shangrila.gov.sr
+Password - shangrila2024$
+
 ## QR codes to try -
 
 Note - The QR code could be used with registration only once. Please feel free to try with other QR codes if already used. 
